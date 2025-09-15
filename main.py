@@ -1,5 +1,5 @@
-# main.p
-import os
+import os,sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "lib"))
 import json
 import subprocess
 from flowlauncher import FlowLauncher
@@ -97,4 +97,3 @@ class WallpaperSwitcher(FlowLauncher):
 
 if __name__ == "__main__":
     WallpaperSwitcher()
-
