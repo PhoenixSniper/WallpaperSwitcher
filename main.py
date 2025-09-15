@@ -1,9 +1,13 @@
-# main.p
-import os
+import os,sys
+from pathlib import Path
 import json
 import subprocess
 from flowlauncher import FlowLauncher
 from PIL import Image
+
+plugindir = Path.absolute(Path(__file__).parent)
+paths = (".", "lib", "plugin")
+sys.path = [str(plugindir / p) for p in paths] + sys.path
 
 # ⚠️ Change this to your Wallpaper Engine path
 WALLPAPER_ENGINE_EXE = r"E:\SteamLibrary\steamapps\common\wallpaper_engine\wallpaper64.exe"
@@ -14,7 +18,7 @@ WALLPAPER_DIRS = [
 ]
 
 # Temp cache folder for converted previews
-CACHE_DIR = os.path.expanduser("~/.wallpaper_cache")
+CACHE_DIR = os.path.expanduser("~/.cache/wallpaper")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 class WallpaperSwitcher(FlowLauncher):
@@ -97,4 +101,3 @@ class WallpaperSwitcher(FlowLauncher):
 
 if __name__ == "__main__":
     WallpaperSwitcher()
-
