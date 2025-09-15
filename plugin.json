@@ -1,0 +1,12 @@
+{
+  "ID": "4e43d9c6-8d6a-4c67-9c21-23a6df1f4a8b",
+  "ActionKeyword": "wp",
+  "Name": "Wallpaper Switcher",
+  "Description": "Switch Wallpaper Engine wallpapers",
+  "Author": "PhoenixSniper",
+  "Version": "1.0",
+  "Language": "python",
+  "Website": "https://github.com/PhoenixSniper",
+  "IcoPath": "icon.png",
+  "ExecuteFileName": "main.py"
+}
