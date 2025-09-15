@@ -1,8 +1,9 @@
-# main.py
+# main.p
 import os
 import json
 import subprocess
 from flowlauncher import FlowLauncher
+from PIL import Image
 
 # ⚠️ Change this to your Wallpaper Engine path
 WALLPAPER_ENGINE_EXE = r"E:\SteamLibrary\steamapps\common\wallpaper_engine\wallpaper64.exe"
@@ -11,6 +12,10 @@ WALLPAPER_ENGINE_EXE = r"E:\SteamLibrary\steamapps\common\wallpaper_engine\wallp
 WALLPAPER_DIRS = [
     r"E:\SteamLibrary\steamapps\workshop\content\431960",  # Steam Workshop wallpapers
 ]
+
+# Temp cache folder for converted previews
+CACHE_DIR = os.path.expanduser("~/.wallpaper_cache")
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 class WallpaperSwitcher(FlowLauncher):
 
@@ -23,7 +28,7 @@ class WallpaperSwitcher(FlowLauncher):
             if query.lower() in wp["name"].lower():
                 results.append({
                     "Title": wp["name"],
-                    "SubTitle": wp["path"],
+                    # "SubTitle": wp["path"],
                     "IcoPath": wp["preview"] if os.path.exists(wp["preview"]) else "icon.png",
                     "JsonRPCAction": {
                         "method": "set_wallpaper",
@@ -43,12 +48,41 @@ class WallpaperSwitcher(FlowLauncher):
                         with open(pj_path, "r", encoding="utf-8") as f:
                             data = json.load(f)
                             name = data.get("title", os.path.basename(root))
-                            preview = os.path.join(root, "preview.jpg")
-                            wallpapers.append({
-                                "name": name,
-                                "path": pj_path,
-                                "preview": preview
-                            })
+
+                        # Find preview file
+                        preview = None
+                        for ext in ("jpg", "png", "gif"):
+                            candidate = os.path.join(root, f"preview.{ext}")
+                            if os.path.exists(candidate):
+                                preview = candidate
+                                break
+
+                        if preview and preview.endswith(".gif"):
+                            # Convert gif -> jpg once and store in cache
+                            cache_file = os.path.join(
+                                CACHE_DIR,
+                                f"{os.path.basename(root)}.jpg"
+                            )
+                            if not os.path.exists(cache_file):
+                                try:
+                                    img = Image.open(preview)
+                                    # Get middle frame
+                                    total_frames = getattr(img, "n_frames", 1)
+                                    middle_frame = total_frames // 2
+
+                                    img.seek(middle_frame)  # move to middle frame
+                                    img.convert("RGB").save(cache_file, "JPEG")
+                                except Exception as e:
+                                    print(f"GIF convert failed {preview}: {e}")
+                                    cache_file = "icon.png"
+                            preview = cache_file
+
+                        wallpapers.append({
+                            "name": name,
+                            "path": pj_path,
+                            "preview": preview or "icon.png"
+                        })
+
                     except Exception as e:
                         print(f"Error reading {pj_path}: {e}")
         return wallpapers
@@ -63,3 +97,4 @@ class WallpaperSwitcher(FlowLauncher):
 
 if __name__ == "__main__":
     WallpaperSwitcher()
+
